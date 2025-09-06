@@ -6,7 +6,7 @@ import tensorflow as tf
 app = Flask(__name__)
 
 # TODO: load your model here
-# model = tf.keras.models.load_model("model.keras")
+model = tf.keras.models.load_model("ASL.keras")
 
 def preprocess(img: Image.Image):
     img = img.convert("RGB").resize((224, 224))
