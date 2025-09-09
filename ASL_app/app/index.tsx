@@ -30,13 +30,65 @@ export default function App() {
     );
   }
 
+  const sendPicture = async (uri: string) => {
+    try{
+        const pythonServer = 'http://127.0.0.1:8000/predict';
+        console.log("Sending image to server:", pythonServer);
+        // fetch(pythonServer, {   
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({ image: uri })
+        // })
+        // .then(response => response.json())
+        // .then(data => console.log('Success:', data))
+        // .catch((error) => console.error('Error:', error));
+        const response = await fetch(pythonServer, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Specify content type as JSON
+            },
+            body: JSON.stringify({ image: uri }), // Convert the data object to a JSON string
+        });
+
+        // Error handling
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+        const { data, errors } = await response.json()
+        if (response.ok) {
+            return data;
+        } else {
+            return Promise.reject(errors);
+        }
+    } catch (error) {
+        console.error("Failed to send picture to server:", error); 
+    }
+  };
+
+  // OVER HERE< WORK ON THIS PLEASESEEEEE
   const takePicture = async () => {
     try{
         const photo = await ref.current?.takePictureAsync();
         setUri(photo?.uri ?? null);
+        console.log("Picture taken with URI:", photo?.uri);
     } catch (error)
     {
         console.error("Failed to take picture:", error); 
+    }
+
+    // If works, send picture to server
+    try{
+        console.log("Picture URI Right before send:", photo?.uri);
+        if (uri) {
+            await sendPicture(uri);
+        } else {
+            console.error("No URI to send to server");
+        }
+    } catch (error)
+    {
+        console.error("Failed to send picture to server:", error); 
     }
   };
 
