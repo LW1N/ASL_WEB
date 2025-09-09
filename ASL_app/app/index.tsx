@@ -33,7 +33,7 @@ export default function App() {
   const takePicture = async () => {
     try{
         const photo = await ref.current?.takePictureAsync();
-        setUri(photo?.uri);
+        setUri(photo?.uri ?? null);
     } catch (error)
     {
         console.error("Failed to take picture:", error); 
@@ -63,7 +63,7 @@ export default function App() {
     return (
       <View>
         <Image
-          source={{ uri }}
+          source={{ uri: uri ?? undefined }} // Fix: never pass null
           contentFit="contain"
           style={{ width: 300, aspectRatio: 1 }}
         />
