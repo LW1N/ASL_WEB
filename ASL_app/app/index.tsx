@@ -49,7 +49,7 @@ export default function App() {
         }
 
         const data = await response.json()
-        console.log("Response from server:", data);
+        console.log("Predicted Sign:", data);
 
     } catch (error) {
         console.error("Failed to send picture to server:", error); 
