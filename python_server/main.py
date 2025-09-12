@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from PIL import Image
 import io, base64, numpy as np
 import tensorflow as tf
 
 app = Flask(__name__)
+CORS(app)
 
 model = tf.keras.models.load_model("ASL.keras")
 
