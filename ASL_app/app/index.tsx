@@ -1,7 +1,9 @@
 import { CameraMode, CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { Image } from "expo-image";
+import { useImage } from "expo-image";
+import * as ImageManipulator from 'expo-image-manipulator';
 import { useState, useRef } from 'react';
 import { Button, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image } from 'react-native';
 
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
@@ -56,20 +58,27 @@ export default function App() {
     }
   };
 
-  // Take picture and passes ImageURI to sendPicture func
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
     setUri(photo?.uri ?? null);
     console.log("Picture taken with URI:", photo?.uri);
 
+    if (!photo?.uri) {
+        console.error("No photo URI available");
+        return;
+    }
+    // try {
+    //     // Crop image
+    //     const processed = await ImageManipulator.useImageManipulator(photo?.uri);
+
+        
+    // } catch (error) {
+    //     console.error("Failed to process or send picture:", error);
+    // }
     // Use other func to upload img to server
     try{
         console.log("Picture URI Right before send:", photo?.uri);
-        if (photo?.uri) {
-            await sendPicture(photo?.uri);
-        } else {
-            console.error("No URI to send to server");
-        }
+        await sendPicture(photo?.uri);
     } catch (error)
     {
         console.error("Failed to send picture to server:", error); 
@@ -172,6 +181,11 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
     width: "50%",
+    height: "50%",
+    borderWidth: 1,
+    borderColor: "black",
+    overflow: "hidden",
+    borderRadius: 20
   },
   shutterContainer: {
     position: "absolute",
