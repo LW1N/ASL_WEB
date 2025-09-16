@@ -1,9 +1,9 @@
 import { CameraMode, CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { useImage } from "expo-image";
+import { Image as ExpoImage } from "expo-image";
 import * as ImageManipulator from 'expo-image-manipulator';
 import { useState, useRef } from 'react';
 import { Button, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Image } from 'react-native';
+import { Image as ReactImage } from 'react-native';
 
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
@@ -60,7 +60,7 @@ export default function App() {
 
 async function cropToSquare(uri: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    Image.getSize(
+    ReactImage.getSize(
       uri,
       async (width, height) => {
         try {
@@ -95,13 +95,14 @@ async function cropToSquare(uri: string): Promise<string> {
 
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
-    setUri(photo?.uri ?? null);
-    console.log("Picture taken with URI:", photo?.uri);
-
     if (!photo?.uri) {
         console.error("No photo URI available");
         return;
     }
+    setUri(photo?.uri);
+    console.log("Picture taken with URI:", photo?.uri);
+
+    
     const croppedUri = await cropToSquare(photo?.uri);
 
     try{
@@ -135,11 +136,11 @@ async function cropToSquare(uri: string): Promise<string> {
   const renderPicture = () => {
     return (
       <View>
-        <Image
-          source={{ uri: uri ?? undefined }} // Fix: never pass null
+        {uri && (<ExpoImage
+          source={{ uri }}
           contentFit="contain"
           style={{ width: 300, aspectRatio: 1 }}
-        />
+        />)}
         <Button onPress={() => setUri(null)} title="Take another picture" />
       </View>
     );
@@ -147,6 +148,7 @@ async function cropToSquare(uri: string): Promise<string> {
 
   const renderCamera = () => {
     return (
+     <View style={styles.cameraWrapper}>
       <CameraView
         style={styles.camera}
         ref={ref}
@@ -154,7 +156,8 @@ async function cropToSquare(uri: string): Promise<string> {
         facing={facing}
         mute={false}
         responsiveOrientationWhenOrientationLocked
-      >
+      > </CameraView>
+        
         <View style={styles.shutterContainer}>
           <Pressable onPress={toggleMode}>
             {mode === "picture" ? (
@@ -173,14 +176,9 @@ async function cropToSquare(uri: string): Promise<string> {
                   },
                 ]}
               >
-                <View
-                  style={[
-                    styles.shutterBtnInner,
-                    {
-                      backgroundColor: mode === "picture" ? "white" : "red",
-                    },
-                  ]}
-                />
+                <View style={styles.shutterBtnInner}>
+                    <Text style={styles.shutterBtnText}>Take Picture</Text>
+                </View>
               </View>
             )}
           </Pressable>
@@ -188,7 +186,8 @@ async function cropToSquare(uri: string): Promise<string> {
             <FontAwesome6 name="rotate-left" size={32} color="white" />
           </Pressable>
         </View>
-      </CameraView>
+      {/* </CameraView> */}
+      </View>
     );
   };
 
@@ -206,38 +205,50 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  camera: {
-    flex: 1,
-    width: "50%",
-    height: "50%",
+  cameraWrapper: {
+    width: 500,
+    height: 500,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "black",
-    overflow: "hidden",
-    borderRadius: 20
+    alignItems: "center",
+  },
+  camera: {
+    // flex: 1,              // camera fills wrapper
+    width: "100%",
+    height: "100%",
   },
   shutterContainer: {
     position: "absolute",
-    bottom: 44,
-    left: 0,
+    top: "100%",
     width: "100%",
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 30,
   },
   shutterBtn: {
-    backgroundColor: "transparent",
+    backgroundColor: "black",  // button background
     borderWidth: 5,
-    borderColor: "white",
-    width: 85,
-    height: 85,
-    borderRadius: 45,
+    borderColor: "black",
+    width: 100,               // make it slightly bigger for text
+    height: 100,
+    borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
   },
+
   shutterBtnInner: {
-    width: 70,
-    height: 70,
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 50,
+  },
+
+  shutterBtnText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 14,
   },
 });
