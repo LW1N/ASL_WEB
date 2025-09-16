@@ -16,6 +16,7 @@ export default function App() {
     const [mode, setMode] = useState<CameraMode>("picture");
     const [facing, setFacing] = useState<CameraType>("back");
     const [recording, setRecording] = useState(false);
+    const [prediction, setPrediction] = useState<string | null>(null);
 
     if (!permission) {
         return null;
@@ -51,13 +52,17 @@ export default function App() {
             }
 
             const data = await response.json()
-            console.log("Predicted Sign:", data);
+            console.log("Predicted Sign:", data?.data?.predicted_class);
+
+            // Store prediction result in state
+            setPrediction(data?.data?.predicted_class || JSON.stringify(data?.data?.predicted_class));
 
         } catch (error) {
             console.error("Failed to send picture to server:", error); 
         }
     };
 
+    // Helper function to crop image to 200x200 square
     async function cropToSquare(uri: string): Promise<string> {
         return new Promise((resolve, reject) => {
             ReactImage.getSize(
@@ -136,10 +141,17 @@ export default function App() {
         return (
             <View>
                 {uri && (<ExpoImage
-                source={{ uri }}
-                contentFit="contain"
-                style={{ width: 300, aspectRatio: 1 }}
-                />)}
+                    source={{ uri }}
+                    contentFit="contain"
+                    style={{ width: 300, aspectRatio: 1 }}
+                    />)
+                }
+
+                {prediction && (
+                    <Text style={{ marginTop: 10, fontSize: 18, fontWeight: "bold" }}>
+                    Prediction: {prediction}
+                    </Text>
+                )}
                 <Button onPress={() => setUri(null)} title="Take another picture" />
             </View>
         );
