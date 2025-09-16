@@ -58,6 +58,44 @@ export default function App() {
     }
   };
 
+async function cropToSquare(uri: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    Image.getSize(
+      uri,
+      async (width, height) => {
+        try {
+          const cropSize = 200;
+          const cropRect = {
+            originX: (width - cropSize) / 2,
+            originY: (height - cropSize) / 2,
+            width: cropSize,
+            height: cropSize,
+          };
+
+          // New API: use manipulate (contextual API)
+          const context = ImageManipulator.manipulate(uri);
+          context.crop(cropRect);
+          const result = await context.renderAsync({
+            compress: 1,
+            format: ImageManipulator.SaveFormat.PNG,
+            base64: true,
+          });
+
+          // result.base64 and result.uri available
+          const base64Uri = `data:image/png;base64,${result.base64}`;
+          resolve(base64Uri);
+        } catch (error) {
+          reject(error);
+        }
+      },
+      (error) => {
+        reject(error);
+      }
+    );
+  });
+}
+
+
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
     setUri(photo?.uri ?? null);
@@ -67,18 +105,11 @@ export default function App() {
         console.error("No photo URI available");
         return;
     }
-    // try {
-    //     // Crop image
-    //     const processed = await ImageManipulator.useImageManipulator(photo?.uri);
+    const croppedUri = await cropToSquare(photo?.uri);
 
-        
-    // } catch (error) {
-    //     console.error("Failed to process or send picture:", error);
-    // }
-    // Use other func to upload img to server
     try{
-        console.log("Picture URI Right before send:", photo?.uri);
-        await sendPicture(photo?.uri);
+        console.log("Cropped pic URI Right before send:", croppedUri);
+        await sendPicture(croppedUri);
     } catch (error)
     {
         console.error("Failed to send picture to server:", error); 
