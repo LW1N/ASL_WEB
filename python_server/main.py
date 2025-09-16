@@ -1,16 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-# from PIL import Image
-# from io import BytesIO
-# from base64 import b64decode
 from urllib import request as urlRequest
 import numpy as np
 import tensorflow as tf
-# from tensorflow.keras.preprocessing import image as tfImage
 import skimage
 from skimage.transform import resize
 import cv2
-# import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 CORS(app)
@@ -33,14 +28,6 @@ def predict():
     img = cv2.imread("received_image.png")
     img = skimage.transform.resize(img, (64, 64, 3))
     img_array = np.array(img).reshape((-1, 64, 64, 3))
-
-    # img_resized = img.resize((64, 64))
-    # img_resized = img_resized.convert('RGB')  # Ensure 3 channels
-    # img_resized.save('resized_image.png')
-    # Preprocess image for model input
-    # img_array = tfImage.img_to_array(img_resized)                           # convert to numpy array
-    # img_array = img_array / 255.0                                 # normalize to [0,1]
-    # img_array = np.expand_dims(img_array, axis=0)  
 
     # Make model prediction and process output
     predictions = model.predict(img_array)
