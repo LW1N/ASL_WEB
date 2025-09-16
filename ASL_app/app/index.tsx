@@ -72,28 +72,25 @@ async function cropToSquare(uri: string): Promise<string> {
             height: cropSize,
           };
 
-          // New API: use manipulate (contextual API)
-          const context = ImageManipulator.manipulate(uri);
-          context.crop(cropRect);
-          const result = await context.renderAsync({
-            compress: 1,
-            format: ImageManipulator.SaveFormat.PNG,
-            base64: true,
-          });
+          const result = await ImageManipulator.manipulateAsync(
+            uri,
+            [
+              { crop: cropRect }
+            ],
+            { compress: 1, format: ImageManipulator.SaveFormat.PNG, base64: true }
+          );
 
-          // result.base64 and result.uri available
           const base64Uri = `data:image/png;base64,${result.base64}`;
           resolve(base64Uri);
-        } catch (error) {
-          reject(error);
+        } catch (err) {
+          reject(err);
         }
       },
-      (error) => {
-        reject(error);
-      }
+      (err) => reject(err)
     );
   });
 }
+
 
 
   const takePicture = async () => {
