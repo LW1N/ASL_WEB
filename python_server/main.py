@@ -40,9 +40,6 @@ def predict():
     # Make model prediction from image array
     predictions = model.predict(img_array)
 
-    # DEBUG: Print raw predictions to understand output shape and values
-    print("Raw model predictions:", predictions)
-
     # Mode output shape: (1, 29)
     predicted_class = np.argmax(predictions, axis=1)[0]
 
@@ -56,8 +53,10 @@ def predict():
     # Find the index of the highest prediction score(most likely letter)
     predicted_class = np.argmax(predictions)
 
+    # DEBUG: Print raw predictions to understand output shape and values
+    # print("Raw model predictions:", predictions)
     # DEBUG: Check if predicted_class is within valid range
-    print("Predicted label:", class_names[predicted_class])
+    # print("Predicted label:", class_names[predicted_class])
 
     return jsonify(message="Prediction made", data={"predicted_class": (class_names[predicted_class])}), 200
 
