@@ -12,6 +12,12 @@ CORS(app)
 
 model = tf.keras.models.load_model("ASL.keras")
 
+# Default route to check if server is running
+@app.route("/")
+def home():
+    return "This is the ASL prediction server. Currently accepting POST requests at /predict endpoint."
+
+# Prediction route to handle incoming image data and return model predictions
 @app.route("/predict", methods=["POST"])
 def predict():
     data = request.get_json(force=True)
@@ -27,13 +33,20 @@ def predict():
     # Resize image to 64x64 for processing
     img = cv2.imread("received_image.png")
     img = skimage.transform.resize(img, (64, 64, 3))
+
+    # Store image as numpy array
     img_array = np.array(img).reshape((-1, 64, 64, 3))
 
-    # Make model prediction and process output
+    # Make model prediction from image array
     predictions = model.predict(img_array)
+
+    # DEBUG: Print raw predictions to understand output shape and values
     print("Raw model predictions:", predictions)
+
     # Mode output shape: (1, 29)
     predicted_class = np.argmax(predictions, axis=1)[0]
+
+    # List of class names corresponding to model output indices
     class_names = [
     'A','B','C','D','E','F','G','H','I','J',
     'K','L','M','N','O','P','Q','R','S','T',
@@ -42,6 +55,8 @@ def predict():
 
     # Find the index of the highest prediction score(most likely letter)
     predicted_class = np.argmax(predictions)
+
+    # DEBUG: Check if predicted_class is within valid range
     print("Predicted label:", class_names[predicted_class])
 
     return jsonify(message="Prediction made", data={"predicted_class": (class_names[predicted_class])}), 200
